@@ -1,0 +1,920 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chemistry Bonds Explorer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .page {
+            display: none;
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            color: white;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .main-menu {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            flex-wrap: wrap;
+        }
+
+        .menu-card {
+            background: white;
+            border-radius: 15px;
+            padding: 40px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+            min-width: 250px;
+        }
+
+        .menu-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+        }
+
+        .menu-card h2 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 1.8em;
+        }
+
+        .menu-card p {
+            color: #666;
+            line-height: 1.6;
+        }
+
+        .theory-content {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 20px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+        }
+
+        .theory-content h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+
+        .theory-content h3 {
+            color: #764ba2;
+            margin: 20px 0 10px 0;
+        }
+
+        .bond-matrix {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .bond-item {
+            background: #f8f9ff;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+
+        .quiz-levels {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .level-card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .level-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+        }
+
+        .level-card.completed {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .crossword-container {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 20px;
+        }
+
+        .crossword-grid {
+            display: grid;
+            grid-template-columns: repeat(10, 1fr);
+            gap: 2px;
+            max-width: 400px;
+            margin: 20px auto;
+        }
+
+        .crossword-cell {
+            width: 35px;
+            height: 35px;
+            border: 2px solid #ddd;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            background: white;
+        }
+
+        .crossword-cell.black {
+            background: #333;
+        }
+
+        .crossword-cell.active {
+            background: #667eea;
+            color: white;
+        }
+
+        .crossword-cell input {
+            width: 100%;
+            height: 100%;
+            border: none;
+            text-align: center;
+            font-size: 14px;
+            font-weight: bold;
+            background: transparent;
+        }
+
+        .clues {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-top: 30px;
+        }
+
+        .clue-section h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+
+        .clue-item {
+            margin-bottom: 10px;
+            padding: 8px;
+            background: #f8f9ff;
+            border-radius: 5px;
+        }
+
+        .score-display {
+            background: #4CAF50;
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 1.2em;
+        }
+
+        .btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: background 0.3s ease;
+            margin: 10px 5px;
+        }
+
+        .btn:hover {
+            background: #5a67d8;
+        }
+
+        .btn-back {
+            background: #764ba2;
+        }
+
+        .btn-back:hover {
+            background: #6b46c1;
+        }
+
+        .feedback {
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            font-weight: bold;
+        }
+
+        .feedback.correct {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .feedback.incorrect {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        @media (max-width: 768px) {
+            .main-menu {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .clues {
+                grid-template-columns: 1fr;
+            }
+            
+            .quiz-levels {
+                grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Main Menu Page -->
+    <div id="mainMenu" class="page active">
+        <div class="container">
+            <div class="header">
+                <h1>🧪 Chemistry Bonds Explorer</h1>
+                <p>Learn about chemical bonds through interactive theory and fun crossword puzzles!</p>
+            </div>
+            
+            <div class="main-menu">
+                <div class="menu-card" onclick="showTheory()">
+                    <h2>📚 THEORY</h2>
+                    <p>Explore chemical bonds and covalent bonding concepts with interactive diagrams and detailed explanations.</p>
+                </div>
+                
+                <div class="menu-card" onclick="showQuiz()">
+                    <h2>🧩 QUIZ</h2>
+                    <p>Test your knowledge with 10 levels of chemistry crossword puzzles. Earn points and track your progress!</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Theory Page -->
+    <div id="theoryPage" class="page">
+        <div class="container">
+            <div class="theory-content">
+                <h2>Chemical Bonds Overview</h2>
+                <p>Chemical bonds are the forces that hold atoms together in compounds. Understanding these bonds is crucial for understanding how molecules form and behave.</p>
+                
+                <h3>Types of Chemical Bonds:</h3>
+                <div class="bond-matrix">
+                    <div class="bond-item">
+                        <strong>Ionic Bonds</strong><br>
+                        Formed by electron transfer between atoms. Creates charged ions that attract each other.
+                    </div>
+                    <div class="bond-item">
+                        <strong>Covalent Bonds</strong><br>
+                        Formed by sharing electrons between atoms. Can be single, double, or triple bonds.
+                    </div>
+                    <div class="bond-item">
+                        <strong>Metallic Bonds</strong><br>
+                        Found in metals where electrons form a "sea" around metal atoms.
+                    </div>
+                </div>
+            </div>
+
+            <div class="theory-content">
+                <h2>Covalent Bonds Matrix</h2>
+                <p>Covalent bonds form when atoms share electrons to achieve stable electron configurations.</p>
+                
+                <h3>Types of Covalent Bonds:</h3>
+                <div class="bond-matrix">
+                    <div class="bond-item">
+                        <strong>Single Bond (C-C)</strong><br>
+                        One pair of shared electrons<br>
+                        Example: H-H in H₂
+                    </div>
+                    <div class="bond-item">
+                        <strong>Double Bond (C=C)</strong><br>
+                        Two pairs of shared electrons<br>
+                        Example: O=O in O₂
+                    </div>
+                    <div class="bond-item">
+                        <strong>Triple Bond (C≡C)</strong><br>
+                        Three pairs of shared electrons<br>
+                        Example: N≡N in N₂
+                    </div>
+                    <div class="bond-item">
+                        <strong>Polar Covalent</strong><br>
+                        Unequal sharing of electrons<br>
+                        Example: H-O in H₂O
+                    </div>
+                    <div class="bond-item">
+                        <strong>Nonpolar Covalent</strong><br>
+                        Equal sharing of electrons<br>
+                        Example: C-C in ethane
+                    </div>
+                    <div class="bond-item">
+                        <strong>Coordinate Covalent</strong><br>
+                        One atom provides both electrons<br>
+                        Example: NH₄⁺ ion
+                    </div>
+                </div>
+            </div>
+
+            <button class="btn btn-back" onclick="showMainMenu()">← Back to Main Menu</button>
+        </div>
+    </div>
+
+    <!-- Quiz Page -->
+    <div id="quizPage" class="page">
+        <div class="container">
+            <div class="score-display">
+                <div>Total Score: <span id="totalScore">0</span> points</div>
+            </div>
+            
+            <div class="theory-content">
+                <h2>🧩 Chemistry Crossword Levels</h2>
+                <p>Complete crossword puzzles to test your chemistry knowledge. Each correct answer earns you points!</p>
+                <div style="background: #e8f5e8; padding: 15px; border-radius: 8px; margin: 15px 0;">
+                    <h3 style="color: #2e7d32; margin-bottom: 10px;">🏆 Scoring System:</h3>
+                    <ul style="margin: 0; padding-left: 20px; color: #2e7d32;">
+                        <li><strong>Word Points:</strong> Each correct word earns 15-75 points</li>
+                        <li><strong>Completion Bonus:</strong> Extra 50-300 points for completing entire puzzle</li>
+                        <li><strong>Progressive Rewards:</strong> Higher levels give bigger completion bonuses</li>
+                        <li><strong>Total Possible:</strong> Up to 4,425 points across all levels!</li>
+                    </ul>
+                </div>
+                
+                <div class="quiz-levels" id="levelGrid">
+                    <!-- Levels will be generated by JavaScript -->
+                </div>
+            </div>
+
+            <button class="btn btn-back" onclick="showMainMenu()">← Back to Main Menu</button>
+        </div>
+    </div>
+
+    <!-- Crossword Game Page -->
+    <div id="crosswordPage" class="page">
+        <div class="container">
+            <div class="score-display">
+                <div>Level <span id="currentLevel">1</span> | Score: <span id="levelScore">0</span> points</div>
+            </div>
+
+            <div class="crossword-container">
+                <h2 id="crosswordTitle">Level 1 - Basic Chemistry Terms</h2>
+                
+                <div class="crossword-grid" id="crosswordGrid">
+                    <!-- Grid will be generated by JavaScript -->
+                </div>
+
+                <div class="clues">
+                    <div class="clue-section">
+                        <h3>Across</h3>
+                        <div id="acrossClues">
+                            <!-- Clues will be generated by JavaScript -->
+                        </div>
+                    </div>
+                    <div class="clue-section">
+                        <h3>Down</h3>
+                        <div id="downClues">
+                            <!-- Clues will be generated by JavaScript -->
+                        </div>
+                    </div>
+                </div>
+
+                <div id="feedback"></div>
+
+                <div style="text-align: center; margin-top: 20px;">
+                    <button class="btn" onclick="checkAnswers()">Check Answers</button>
+                    <button class="btn" onclick="showHints()">Show Hints</button>
+                    <button class="btn btn-back" onclick="showQuiz()">← Back to Levels</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let totalScore = 0;
+        let currentLevelData = null;
+        let completedLevels = [];
+
+        // Complete crossword data for all 10 levels
+        const crosswordData = {
+            1: {
+                title: "Level 1 - Basic Chemistry Terms",
+                grid: [
+                    ['A','T','O','M',''],
+                    ['','','','',''],
+                    ['I','O','N','',''],
+                    ['','','','',''],
+                    ['','','','','']
+                ],
+                clues: {
+                    across: [
+                        { number: 1, clue: "Smallest unit of matter (4 letters)", answer: "ATOM" },
+                        { number: 3, clue: "Charged particle (3 letters)", answer: "ION" }
+                    ],
+                    down: []
+                },
+                answers: { "ATOM": 20, "ION": 15 }
+            },
+            2: {
+                title: "Level 2 - Chemical Bonds",
+                grid: [
+                    ['C','O','V','A','L','E','N','T'],
+                    ['','','','','','','',''],
+                    ['I','O','N','I','C','','',''],
+                    ['','','','','','','',''],
+                    ['','','','','','','','']
+                ],
+                clues: {
+                    across: [
+                        { number: 1, clue: "Bond formed by sharing electrons (8 letters)", answer: "COVALENT" },
+                        { number: 3, clue: "Bond formed by electron transfer (5 letters)", answer: "IONIC" }
+                    ],
+                    down: []
+                },
+                answers: { "COVALENT": 30, "IONIC": 20 }
+            },
+            3: {
+                title: "Level 3 - Elements & Particles",
+                grid: [
+                    ['P','R','O','T','O','N',''],
+                    ['','','','','','',''],
+                    ['E','L','E','C','T','R','O','N'],
+                    ['','','','','','','',''],
+                    ['N','E','U','T','R','O','N','']
+                ],
+                clues: {
+                    across: [
+                        { number: 1, clue: "Positively charged particle in nucleus (6 letters)", answer: "PROTON" },
+                        { number: 3, clue: "Negatively charged particle (8 letters)", answer: "ELECTRON" },
+                        { number: 5, clue: "Neutral particle in nucleus (7 letters)", answer: "NEUTRON" }
+                    ],
+                    down: []
+                },
+                answers: { "PROTON": 25, "ELECTRON": 30, "NEUTRON": 25 }
+            },
+            4: {
+                title: "Level 4 - Common Molecules",
+                grid: [
+                    ['W','A','T','E','R',''],
+                    ['','','','','',''],
+                    ['O','X','Y','G','E','N'],
+                    ['','','','','',''],
+                    ['M','E','T','H','A','N','E']
+                ],
+                clues: {
+                    across: [
+                        { number: 1, clue: "H2O molecule (5 letters)", answer: "WATER" },
+                        { number: 3, clue: "O2 gas we breathe (6 letters)", answer: "OXYGEN" },
+                        { number: 5, clue: "CH4 natural gas (7 letters)", answer: "METHANE" }
+                    ],
+                    down: []
+                },
+                answers: { "WATER": 20, "OXYGEN": 25, "METHANE": 30 }
+            },
+            5: {
+                title: "Level 5 - Bond Properties",
+                grid: [
+                    ['P','O','L','A','R',''],
+                    ['','','','','',''],
+                    ['N','O','N','P','O','L','A','R'],
+                    ['','','','','','','',''],
+                    ['D','I','P','O','L','E','','']
+                ],
+                clues: {
+                    across: [
+                        { number: 1, clue: "Unequal electron sharing (5 letters)", answer: "POLAR" },
+                        { number: 3, clue: "Equal electron sharing (8 letters)", answer: "NONPOLAR" },
+                        { number: 5, clue: "Molecule with positive and negative ends (6 letters)", answer: "DIPOLE" }
+                    ],
+                    down: []
+                },
+                answers: { "POLAR": 25, "NONPOLAR": 35, "DIPOLE": 30 }
+            },
+            6: {
+                title: "Level 6 - Molecular Geometry",
+                grid: [
+                    ['L','I','N','E','A','R',''],
+                    ['','','','','','',''],
+                    ['B','E','N','T','','',''],
+                    ['','','','','','',''],
+                    ['T','E','T','R','A','H','E','D','R','A','L']
+                ],
+                clues: {
+                    across: [
+                        { number: 1, clue: "Straight line molecular shape (6 letters)", answer: "LINEAR" },
+                        { number: 3, clue: "V-shaped molecular geometry (4 letters)", answer: "BENT" },
+                        { number: 5, clue: "Four-sided pyramid shape (11 letters)", answer: "TETRAHEDRAL" }
+                    ],
+                    down: []
+                },
+                answers: { "LINEAR": 30, "BENT": 20, "TETRAHEDRAL": 45 }
+            },
+            7: {
+                title: "Level 7 - Advanced Bonding",
+                grid: [
+                    ['H','Y','B','R','I','D','I','Z','A','T','I','O','N'],
+                    ['','','','','','','','','','','','',''],
+                    ['R','E','S','O','N','A','N','C','E','','','',''],
+                    ['','','','','','','','','','','','',''],
+                    ['O','R','B','I','T','A','L','','','','','','']
+                ],
+                clues: {
+                    across: [
+                        { number: 1, clue: "Mixing of atomic orbitals (13 letters)", answer: "HYBRIDIZATION" },
+                        { number: 3, clue: "Multiple valid Lewis structures (9 letters)", answer: "RESONANCE" },
+                        { number: 5, clue: "Electron cloud around nucleus (7 letters)", answer: "ORBITAL" }
+                    ],
+                    down: []
+                },
+                answers: { "HYBRIDIZATION": 60, "RESONANCE": 40, "ORBITAL": 30 }
+            },
+            8: {
+                title: "Level 8 - Electronegativity",
+                grid: [
+                    ['E','L','E','C','T','R','O','N','E','G','A','T','I','V','I','T','Y'],
+                    ['','','','','','','','','','','','','','','','',''],
+                    ['F','L','U','O','R','I','N','E','','','','','','','','',''],
+                    ['','','','','','','','','','','','','','','','',''],
+                    ['C','E','S','I','U','M','','','','','','','','','','','']
+                ],
+                clues: {
+                    across: [
+                        { number: 1, clue: "Ability to attract electrons (17 letters)", answer: "ELECTRONEGATIVITY" },
+                        { number: 3, clue: "Most electronegative element (8 letters)", answer: "FLUORINE" },
+                        { number: 5, clue: "Least electronegative element (6 letters)", answer: "CESIUM" }
+                    ],
+                    down: []
+                },
+                answers: { "ELECTRONEGATIVITY": 70, "FLUORINE": 35, "CESIUM": 30 }
+            },
+            9: {
+                title: "Level 9 - Chemical Reactions",
+                grid: [
+                    ['S','Y','N','T','H','E','S','I','S',''],
+                    ['','','','','','','','','',''],
+                    ['D','E','C','O','M','P','O','S','I','T','I','O','N'],
+                    ['','','','','','','','','','','','',''],
+                    ['C','A','T','A','L','Y','S','T','','','','','']
+                ],
+                clues: {
+                    across: [
+                        { number: 1, clue: "Combining reactants to form products (9 letters)", answer: "SYNTHESIS" },
+                        { number: 3, clue: "Breaking down compounds (12 letters)", answer: "DECOMPOSITION" },
+                        { number: 5, clue: "Substance that speeds up reactions (8 letters)", answer: "CATALYST" }
+                    ],
+                    down: []
+                },
+                answers: { "SYNTHESIS": 40, "DECOMPOSITION": 55, "CATALYST": 35 }
+            },
+            10: {
+                title: "Level 10 - Advanced Chemistry",
+                grid: [
+                    ['I','N','T','E','R','M','O','L','E','C','U','L','A','R'],
+                    ['','','','','','','','','','','','','',''],
+                    ['V','A','N','D','E','R','W','A','A','L','S','','',''],
+                    ['','','','','','','','','','','','','',''],
+                    ['H','Y','D','R','O','G','E','N','B','O','N','D','I','N','G']
+                ],
+                clues: {
+                    across: [
+                        { number: 1, clue: "Forces between separate molecules (14 letters)", answer: "INTERMOLECULAR" },
+                        { number: 3, clue: "Weak attraction between molecules (11 letters)", answer: "VANDERWAALS" },
+                        { number: 5, clue: "Special dipole-dipole attraction (15 letters)", answer: "HYDROGENBONDING" }
+                    ],
+                    down: []
+                },
+                answers: { "INTERMOLECULAR": 70, "VANDERWAALS": 55, "HYDROGENBONDING": 75 }
+            }
+        };
+
+        function showMainMenu() {
+            hideAllPages();
+            document.getElementById('mainMenu').classList.add('active');
+        }
+
+        function showTheory() {
+            hideAllPages();
+            document.getElementById('theoryPage').classList.add('active');
+        }
+
+        function showQuiz() {
+            hideAllPages();
+            document.getElementById('quizPage').classList.add('active');
+            generateLevelGrid();
+        }
+
+        function hideAllPages() {
+            const pages = document.querySelectorAll('.page');
+            pages.forEach(page => page.classList.remove('active'));
+        }
+
+        function generateLevelGrid() {
+            const levelGrid = document.getElementById('levelGrid');
+            levelGrid.innerHTML = '';
+            
+            for (let i = 1; i <= 10; i++) {
+                const levelCard = document.createElement('div');
+                levelCard.className = 'level-card';
+                if (completedLevels.includes(i)) {
+                    levelCard.classList.add('completed');
+                }
+                
+                // Calculate potential points for each level
+                const levelData = crosswordData[i];
+                let wordPoints = 0;
+                if (levelData) {
+                    Object.values(levelData.answers).forEach(points => wordPoints += points);
+                }
+                const completionBonus = calculateCompletionBonus(i);
+                const totalPossible = wordPoints + completionBonus;
+                
+                levelCard.innerHTML = `
+                    <h3>Level ${i}</h3>
+                    <p>${i <= 10 ? `${totalPossible} pts max` : 'Coming Soon'}</p>
+                    ${completedLevels.includes(i) ? '<div style="color: white; font-size: 12px;">✓ COMPLETED</div>' : ''}
+                `;
+                
+                if (i <= 10) {
+                    levelCard.onclick = () => startLevel(i);
+                } else {
+                    levelCard.style.opacity = '0.5';
+                    levelCard.style.cursor = 'not-allowed';
+                }
+                
+                levelGrid.appendChild(levelCard);
+            }
+        }
+
+        function startLevel(level) {
+            if (!crosswordData[level]) {
+                alert('This level is not yet available!');
+                return;
+            }
+            
+            currentLevelData = crosswordData[level];
+            document.getElementById('currentLevel').textContent = level;
+            document.getElementById('levelScore').textContent = '0';
+            document.getElementById('crosswordTitle').textContent = currentLevelData.title;
+            
+            generateCrosswordGrid();
+            generateClues();
+            
+            hideAllPages();
+            document.getElementById('crosswordPage').classList.add('active');
+        }
+
+        function generateCrosswordGrid() {
+            const grid = document.getElementById('crosswordGrid');
+            grid.innerHTML = '';
+            
+            // Create specific grid based on current level
+            const levelGrid = currentLevelData.grid;
+            const rows = levelGrid.length;
+            const cols = levelGrid[0].length;
+            
+            grid.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
+            
+            for (let row = 0; row < rows; row++) {
+                for (let col = 0; col < cols; col++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'crossword-cell';
+                    cell.dataset.row = row;
+                    cell.dataset.col = col;
+                    
+                    if (levelGrid[row][col] === '') {
+                        cell.classList.add('black');
+                    } else {
+                        const input = document.createElement('input');
+                        input.type = 'text';
+                        input.maxLength = 1;
+                        input.style.textTransform = 'uppercase';
+                        input.addEventListener('input', (e) => {
+                            e.target.value = e.target.value.toUpperCase();
+                        });
+                        input.addEventListener('focus', (e) => {
+                            e.target.parentElement.classList.add('active');
+                        });
+                        input.addEventListener('blur', (e) => {
+                            e.target.parentElement.classList.remove('active');
+                        });
+                        cell.appendChild(input);
+                    }
+                    
+                    grid.appendChild(cell);
+                }
+            }
+        }
+
+        function generateClues() {
+            const acrossClues = document.getElementById('acrossClues');
+            const downClues = document.getElementById('downClues');
+            
+            acrossClues.innerHTML = '';
+            downClues.innerHTML = '';
+            
+            if (currentLevelData.clues.across) {
+                currentLevelData.clues.across.forEach(clue => {
+                    const clueDiv = document.createElement('div');
+                    clueDiv.className = 'clue-item';
+                    clueDiv.innerHTML = `<strong>${clue.number}.</strong> ${clue.clue}`;
+                    acrossClues.appendChild(clueDiv);
+                });
+            }
+            
+            if (currentLevelData.clues.down) {
+                currentLevelData.clues.down.forEach(clue => {
+                    const clueDiv = document.createElement('div');
+                    clueDiv.className = 'clue-item';
+                    clueDiv.innerHTML = `<strong>${clue.number}.</strong> ${clue.clue}`;
+                    downClues.appendChild(clueDiv);
+                });
+            }
+        }
+
+        function checkAnswers() {
+            const inputs = document.querySelectorAll('#crosswordGrid input');
+            let levelScore = 0;
+            let correctCount = 0;
+            let totalWords = Object.keys(currentLevelData.answers).length;
+            let feedback = '';
+            let completedWords = [];
+            
+            // Check each word in the current level
+            Object.keys(currentLevelData.answers).forEach(word => {
+                const wordScore = currentLevelData.answers[word];
+                let userWord = '';
+                
+                // Collect all user input to check if target words are present
+                inputs.forEach(input => {
+                    if (input.value) {
+                        userWord += input.value;
+                    }
+                });
+                
+                // Check if any of the target words are found in user input
+                if (userWord.includes(word)) {
+                    correctCount++;
+                    levelScore += wordScore;
+                    completedWords.push(word);
+                    feedback += `<div class="feedback correct">✓ ${word} - Correct! +${wordScore} points</div>`;
+                } else {
+                    feedback += `<div class="feedback incorrect">✗ ${word} - Try again! Hint: ${getHintForWord(word)}</div>`;
+                }
+            });
+            
+            // Calculate completion bonus if all words are correct
+            let completionBonus = 0;
+            if (correctCount === totalWords) {
+                const currentLevel = parseInt(document.getElementById('currentLevel').textContent);
+                completionBonus = calculateCompletionBonus(currentLevel);
+                levelScore += completionBonus;
+                feedback += `<div class="feedback correct">🎉 PUZZLE COMPLETED! All ${totalWords} words correct!</div>`;
+                feedback += `<div class="feedback correct">🏆 Completion Bonus: +${completionBonus} points</div>`;
+                
+                // Mark level as completed
+                if (!completedLevels.includes(currentLevel)) {
+                    completedLevels.push(currentLevel);
+                    feedback += `<div class="feedback correct">⭐ Level ${currentLevel} MASTERED!</div>`;
+                }
+            } else {
+                feedback += `<div class="feedback" style="background: #fff3cd; color: #856404; border: 1px solid #ffeaa7;">📝 Progress: ${correctCount}/${totalWords} words completed</div>`;
+            }
+            
+            // Update scores
+            totalScore += levelScore;
+            document.getElementById('levelScore').textContent = levelScore;
+            document.getElementById('totalScore').textContent = totalScore;
+            
+            // Show detailed feedback
+            let summaryFeedback = `<div style="background: #e3f2fd; padding: 15px; border-radius: 8px; margin: 10px 0;">`;
+            summaryFeedback += `<strong>Level ${document.getElementById('currentLevel').textContent} Results:</strong><br>`;
+            summaryFeedback += `Words Completed: ${correctCount}/${totalWords}<br>`;
+            summaryFeedback += `Word Points: ${levelScore - completionBonus}<br>`;
+            if (completionBonus > 0) {
+                summaryFeedback += `Completion Bonus: ${completionBonus}<br>`;
+            }
+            summaryFeedback += `<strong>Total Level Score: ${levelScore} points</strong>`;
+            summaryFeedback += `</div>`;
+            
+            document.getElementById('feedback').innerHTML = summaryFeedback + feedback;
+        }
+        
+        function calculateCompletionBonus(level) {
+            // Progressive completion bonuses - higher levels get bigger bonuses
+            const bonuses = {
+                1: 50,   // Level 1: 50 bonus points
+                2: 75,   // Level 2: 75 bonus points  
+                3: 100,  // Level 3: 100 bonus points
+                4: 125,  // Level 4: 125 bonus points
+                5: 150,  // Level 5: 150 bonus points
+                6: 175,  // Level 6: 175 bonus points
+                7: 200,  // Level 7: 200 bonus points
+                8: 225,  // Level 8: 225 bonus points
+                9: 250,  // Level 9: 250 bonus points
+                10: 300  // Level 10: 300 bonus points (final level)
+            };
+            return bonuses[level] || 50;
+        }
+        
+        function getHintForWord(word) {
+            const hints = {
+                // Level 1
+                'ATOM': 'Smallest unit of matter (4 letters)',
+                'ION': 'Charged particle (3 letters)',
+                // Level 2
+                'COVALENT': 'Bond formed by sharing electrons (8 letters)',
+                'IONIC': 'Bond formed by electron transfer (5 letters)',
+                // Level 3
+                'PROTON': 'Positively charged particle in nucleus (6 letters)',
+                'ELECTRON': 'Negatively charged particle (8 letters)',
+                'NEUTRON': 'Neutral particle in nucleus (7 letters)',
+                // Level 4
+                'WATER': 'H2O molecule (5 letters)',
+                'OXYGEN': 'O2 gas we breathe (6 letters)',
+                'METHANE': 'CH4 natural gas (7 letters)',
+                // Level 5
+                'POLAR': 'Unequal electron sharing (5 letters)',
+                'NONPOLAR': 'Equal electron sharing (8 letters)',
+                'DIPOLE': 'Molecule with positive and negative ends (6 letters)',
+                // Level 6
+                'LINEAR': 'Straight line molecular shape (6 letters)',
+                'BENT': 'V-shaped molecular geometry (4 letters)',
+                'TETRAHEDRAL': 'Four-sided pyramid shape (11 letters)',
+                // Level 7
+                'HYBRIDIZATION': 'Mixing of atomic orbitals (13 letters)',
+                'RESONANCE': 'Multiple valid Lewis structures (9 letters)',
+                'ORBITAL': 'Electron cloud around nucleus (7 letters)',
+                // Level 8
+                'ELECTRONEGATIVITY': 'Ability to attract electrons (17 letters)',
+                'FLUORINE': 'Most electronegative element (8 letters)',
+                'CESIUM': 'Least electronegative element (6 letters)',
+                // Level 9
+                'SYNTHESIS': 'Combining reactants to form products (9 letters)',
+                'DECOMPOSITION': 'Breaking down compounds (12 letters)',
+                'CATALYST': 'Substance that speeds up reactions (8 letters)',
+                // Level 10
+                'INTERMOLECULAR': 'Forces between separate molecules (14 letters)',
+                'VANDERWAALS': 'Weak attraction between molecules (11 letters)',
+                'HYDROGENBONDING': 'Special dipole-dipole attraction (15 letters)'
+            };
+            return hints[word] || 'Check the theory section for help!';
+        }
+
+        function showHints() {
+            alert('Hint: Look for basic chemistry terms you learned in the theory section!');
+        }
+
+        // Initialize the game
+        document.addEventListener('DOMContentLoaded', function() {
+            generateLevelGrid();
+        });
+    </script>
+</body>
+</html>
